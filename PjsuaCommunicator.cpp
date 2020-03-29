@@ -151,7 +151,7 @@ namespace sip {
             auto msgText = "Incoming call from " + address + ".";
 
             // first, login to Mumble (only matters if MUM_DELAYED_CONNECT)
-            communicator.calls[ci.id].onConnect();
+            communicator.calls[ci.id].onConnect(address);
             pj_thread_sleep(500); // sleep a moment to allow connection to stabilize
 
             communicator.logger.notice(msgText);

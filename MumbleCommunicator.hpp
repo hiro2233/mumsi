@@ -10,7 +10,7 @@
 
 // 0 = mumble users connected at start; 1 = connect at dial-in
 // TODO: fix mumlib::TransportException when this option is enabled
-#define MUM_DELAYED_CONNECT 0
+#define MUM_DELAYED_CONNECT 1
 
 namespace mumble {
 
@@ -53,7 +53,7 @@ namespace mumble {
                 boost::asio::io_service &ioService);
 
         void connect(MumbleCommunicatorConfig &config);
-        void onConnect();
+        void onConnect(const std::string& address);
         void onDisconnect();
         void onCallerAuth();
         //void onCallerUnauth();

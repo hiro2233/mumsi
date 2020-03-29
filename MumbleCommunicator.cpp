@@ -92,9 +92,24 @@ void mumble::MumbleCommunicator::connect(MumbleCommunicatorConfig &config) {
     }
 }
 
-void mumble::MumbleCommunicator::onConnect() {
+void mumble::MumbleCommunicator::onConnect(const std::string& address) {
     if ( MUM_DELAYED_CONNECT ) {
-        mum->connect(mumbleConf.host, mumbleConf.port, mumbleConf.user, mumbleConf.password);
+        std::string user = mumbleConf.user;
+        std::size_t p1 = address.find_first_of('"');
+        std::size_t p2 = address.find_first_of('"', p1 + 1);
+        if (p2 != std::string::npos) {
+            user = address.substr(p1+1, p2-(p1+1));
+        }
+        else {
+            p1 = address.find("sip:");
+            p2 = address.find_first_of('@', p1+4);
+            if (p2 != std::string::npos) {
+                user = address.substr(p1+4, p2-(p1+4));
+            }
+        }
+
+        logger.notice("Logging in as " + user + ".");
+        mum->connect(mumbleConf.host, mumbleConf.port, user, mumbleConf.password);
     }
 
     if ( mumbleConf.comment.size() > 0 ) {

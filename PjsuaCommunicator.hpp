@@ -77,7 +77,7 @@ namespace sip {
         std::function<void(int)> onMuteDeafChange;
         std::function<void(mumlib::UserState field, bool val)> sendUserState;
         std::function<void(mumlib::UserState field, std::string val)> sendUserStateStr;
-        std::function<void()> onConnect;
+        std::function<void(const std::string& address)> onConnect;
         std::function<void()> onDisconnect;
         std::function<void()> onCallerAuth;
         std::function<void()> joinAuthChannel; // DEPRECATE ?

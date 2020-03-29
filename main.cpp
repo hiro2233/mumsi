@@ -211,7 +211,8 @@ int main(int argc, char *argv[]) {
         // PJ triggers Mumble connect
         pjsuaCommunicator.calls[i].onConnect = std::bind(
                 &mumble::MumbleCommunicator::onConnect,
-                mumcom);
+                mumcom,
+		_1);
 
         // PJ triggers Mumble disconnect
         pjsuaCommunicator.calls[i].onDisconnect = std::bind(
