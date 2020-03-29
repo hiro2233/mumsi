@@ -9,13 +9,18 @@
 #include <log4cpp/PatternLayout.hh>
 
 #include <execinfo.h>
+#include <memory>
 
 #include "main.hpp"
+
+namespace {
+
+std::weak_ptr<boost::asio::io_service> g_ioService;
 
 /*
  * Code from http://stackoverflow.com/a/77336/5419223
  */
-static void sigsegv_handler(int sig) {
+void sigsegv_handler(int sig) {
     constexpr int STACK_DEPTH = 10;
     void *array[STACK_DEPTH];
 
@@ -26,8 +31,36 @@ static void sigsegv_handler(int sig) {
     exit(1);
 }
 
+void sigint_handler(int sig)
+{
+    fprintf(stderr, "Caught SIGINT, trying to stop\n");
+    if (auto io = g_ioService.lock()) {
+        io->stop();
+    }
+}
+
+void SetupSignalHandlers()
+{
+    struct sigaction sigIntHandler;
+
+    sigIntHandler.sa_handler = sigsegv_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+
+    sigaction(SIGSEGV, &sigIntHandler, NULL);
+
+    memset(&sigIntHandler, 0, sizeof(sigIntHandler));
+    sigIntHandler.sa_handler = sigint_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+
+    sigaction(SIGINT, &sigIntHandler, NULL);
+}
+
+} // anonymous namespace
+
 int main(int argc, char *argv[]) {
-    signal(SIGSEGV, sigsegv_handler);
+    SetupSignalHandlers();
     int max_calls;
 
     log4cpp::OstreamAppender appender("console", &std::cout);
@@ -50,7 +83,8 @@ int main(int argc, char *argv[]) {
 
     sip::IncomingConnectionValidator connectionValidator(conf.getString("sip.validUriExpression"));
 
-    boost::asio::io_service ioService;
+    auto ioService = std::make_shared<boost::asio::io_service>();
+    g_ioService = ioService;
 
     try {
         max_calls = conf.getInt("sip.max_calls");
@@ -136,7 +170,7 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i<max_calls; i++) {
 
-        auto *mumcom = new mumble::MumbleCommunicator(ioService);
+        auto *mumcom = new mumble::MumbleCommunicator(*ioService);
         mumcom->callId = i;
 
         using namespace std::placeholders;
@@ -247,7 +281,7 @@ int main(int argc, char *argv[]) {
 
     logger.info("Application started.");
 
-    ioService.run();
+    ioService->run();
 
     return 0;
 }
