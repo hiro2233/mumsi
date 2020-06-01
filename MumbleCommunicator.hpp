@@ -10,7 +10,7 @@
 
 // 0 = mumble users connected at start; 1 = connect at dial-in
 // TODO: fix mumlib::TransportException when this option is enabled
-#define MUM_DELAYED_CONNECT 1
+#define MUM_DELAYED_CONNECT 0
 
 namespace mumble {
 
