@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     sip::PjsuaCommunicator pjsuaCommunicator(connectionValidator, conf.getInt("sip.frameLength"), max_calls);
 
     try {
-        pjsuaCommunicator.pins = conf.getChildren("pins");
+        pjsuaCommunicator.pins = conf.getChildren("app");
     } catch (...) {
     }
 
