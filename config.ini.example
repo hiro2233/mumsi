@@ -45,6 +45,7 @@ use_certs = 0
 # Caller PIN needed to authenticate the phone call itself. The caller presses
 # the PIN, followed by the hash '#' key. On success, the caller is
 # unmuted/undeafened. On failure, the SIP call is hung up.
+channel = Blue team
 pin = 4321
 
 [files]
