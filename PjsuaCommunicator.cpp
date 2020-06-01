@@ -140,7 +140,7 @@ namespace sip {
     void _Call::onCallState(pj::OnCallStateParam &prm) {
         auto ci = getInfo();
 
-        communicator.logger.info("Call %d state=%s.", ci.id, ci.stateText.c_str());
+        communicator.logger.notice("Call %d state=%s.", ci.id, ci.stateText.c_str());
 
         string address = ci.remoteUri;
 
@@ -158,7 +158,7 @@ namespace sip {
             communicator.calls[ci.id].sendUserStateStr(mumlib::UserState::COMMENT, msgText);
             communicator.calls[ci.id].onStateChange(msgText);
 
-            pj_thread_sleep(500); // sleep a moment to allow connection to stabilize
+            pj_thread_sleep(1500); // sleep a moment to allow connection to stabilize
             this->playAudioFile(communicator.file_welcome);
 
             communicator.got_dtmf = "";
@@ -294,8 +294,7 @@ namespace sip {
     }
 
     void _Call::onDtmfDigit(pj::OnDtmfDigitParam &prm) {
-        //communicator.logger.notice("DTMF digit '%s' (call %d).",
-        //        prm.digit.c_str(), getId());
+        communicator.logger.notice("DTMF digit '%s' (call %d).", prm.digit.c_str(), getId());
         pj::CallOpParam param;
 
         auto ci = getInfo();
@@ -316,20 +315,20 @@ namespace sip {
                          * When user presses '#', test PIN entry
                          */
                         if ( communicator.pins.size() > 0 ) {
-                            if ( communicator.pins.count(communicator.got_dtmf) > 0 ) {
-                                communicator.logger.info("Caller entered correct PIN");
-                                communicator.dtmf_mode = DTMF_MODE_ROOT;
+                            if ( communicator.pins["pin"] == communicator.got_dtmf ) {
+                                communicator.logger.notice("Caller entered correct PIN");
+                                communicator.dtmf_mode = DTMF_MODE_STAR;
                                 communicator.logger.notice("MYDEBUG: %s:%s",
                                         communicator.got_dtmf.c_str(),
-                                        communicator.pins[communicator.got_dtmf].c_str());
+                                        communicator.pins["pin"].c_str());
                                 communicator.calls[ci.id].joinOtherChannel(
-                                        communicator.pins[communicator.got_dtmf]);
+                                        communicator.pins["channel"]);
 
                                 this->playAudioFile(communicator.file_entering_channel);
                                 communicator.calls[ci.id].sendUserState(mumlib::UserState::SELF_MUTE, false);
                                 this->playAudioFile(communicator.file_announce_new_caller, true);
                             } else {
-                                communicator.logger.info("Caller entered wrong PIN");
+                                communicator.logger.notice("Caller entered wrong PIN");
                                 this->playAudioFile(communicator.file_invalid_pin);
                                 if ( communicator.pin_fails++ >= MAX_PIN_FAILS ) {
                                 param.statusCode = PJSIP_SC_SERVICE_UNAVAILABLE;
@@ -348,6 +347,7 @@ namespace sip {
                          * Allow user to reset PIN entry by pressing '*'
                          */
                         communicator.got_dtmf = "";
+                        communicator.logger.notice("Reseting");
                         this->playAudioFile(communicator.file_prompt_pin);
                         break;
                     default:
@@ -362,6 +362,7 @@ namespace sip {
                             pj_thread_sleep(500); // pause before next announcement
                             this->hangup(param);
                         }
+                        communicator.logger.notice("OnDTMF pin: %s pinscnt %d got: %s", communicator.pins["pin"].c_str(), communicator.pins.count(communicator.got_dtmf), communicator.got_dtmf.c_str());
                 }
                 break;
             case DTMF_MODE_ROOT:
@@ -374,12 +375,14 @@ namespace sip {
                          * Switch user to 'star' menu
                          */
                         communicator.dtmf_mode = DTMF_MODE_STAR;
+                        communicator.logger.notice("Ignore DTMF digit '%s' in ROOT state in (*)", prm.digit.c_str());
+                        this->playAudioFile(communicator.file_menu);
                         break;
                     default:
                         /*
                          * Default is to ignore all digits in root
                          */
-                        communicator.logger.info("Ignore DTMF digit '%s' in ROOT state", prm.digit.c_str());
+                        communicator.logger.notice("Ignore DTMF digit '%s' in ROOT state", prm.digit.c_str());
                 }
                 break;
             case DTMF_MODE_STAR:
@@ -391,11 +394,13 @@ namespace sip {
                         // Mute line
                         communicator.calls[ci.id].sendUserState(mumlib::UserState::SELF_MUTE, true);
                         this->playAudioFile(communicator.file_mute_on);
+                        communicator.dtmf_mode = DTMF_MODE_ROOT;
                         break;
                     case '6':
                         // Un-mute line
                         this->playAudioFile(communicator.file_mute_off);
                         communicator.calls[ci.id].sendUserState(mumlib::UserState::SELF_MUTE, false);
+                        communicator.dtmf_mode = DTMF_MODE_ROOT;
                         break;
                     case '9':
                         if ( communicator.pins.size() > 0 ) {
@@ -411,17 +416,17 @@ namespace sip {
                     case '*':
                     default:
                         // play menu
-                        communicator.logger.info("Unsupported DTMF digit '%s' in state STAR", prm.digit.c_str());
+                        communicator.logger.notice("Unsupported DTMF digit '%s' in state STAR", prm.digit.c_str());
                         this->playAudioFile(communicator.file_menu);
                         break;
                 }
                 /*
                  * In any case, switch back to root after one digit
                  */
-                communicator.dtmf_mode = DTMF_MODE_ROOT;
+                //communicator.dtmf_mode = DTMF_MODE_ROOT;
                 break;
             default:
-                communicator.logger.info("Unexpected DTMF '%s' in unknown state '%d'", prm.digit.c_str(),
+                communicator.logger.notice("Unexpected DTMF '%s' in unknown state '%d'", prm.digit.c_str(),
                         communicator.dtmf_mode);
         }
 
@@ -438,7 +443,7 @@ namespace sip {
 
         string uri = call->getInfo().remoteUri;
 
-        communicator.logger.info("Incoming call from %s.", uri.c_str());
+        communicator.logger.notice("Incoming call from %s.", uri.c_str());
 
         pj::CallOpParam param;
 
@@ -564,12 +569,12 @@ void sip::PjsuaCommunicator::registerAccount(string host, string user, string pa
     string uri = "sip:" + user + "@" + host;
     pj::AccountConfig accountConfig;
     accountConfig.idUri = uri;
-    accountConfig.regConfig.registrarUri = "sip:" + host;
+    //accountConfig.regConfig.registrarUri = "sip:" + host;
 
     pj::AuthCredInfo cred("digest", "*", user, 0, password);
     accountConfig.sipConfig.authCreds.push_back(cred);
 
-    logger.info("Registering account for URI: %s.", uri.c_str());
+    logger.notice("Registering account for URI: %s.", uri.c_str());
     account.reset(new _Account(*this, max_calls));
     account->create(accountConfig);
 }
