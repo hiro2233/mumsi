@@ -43,9 +43,12 @@ RUN apk update \
     && apk --no-cache add log4cpp --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/
 
 RUN mkdir app
-WORKDIR app
 VOLUME /config
+EXPOSE 5060
 
-COPY --from=builder /mumsi/build/mumsi .
+WORKDIR /config
 
-CMD ["./mumsi", "/config/config.ini"]
+COPY --from=builder /mumsi/build/mumsi /app
+COPY media/*.wav /app/media/
+
+CMD ["/app/mumsi", "config.ini"]
