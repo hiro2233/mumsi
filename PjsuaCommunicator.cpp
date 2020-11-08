@@ -585,7 +585,7 @@ void sip::PjsuaCommunicator::registerAccount(string host, string user, string pa
     string uri = "sip:" + user + "@" + host;
     pj::AccountConfig accountConfig;
     accountConfig.idUri = uri;
-    //accountConfig.regConfig.registrarUri = "sip:" + host;
+    accountConfig.regConfig.registrarUri = "sip:" + host;
 
     pj::AuthCredInfo cred("digest", "*", user, 0, password);
     accountConfig.sipConfig.authCreds.push_back(cred);
