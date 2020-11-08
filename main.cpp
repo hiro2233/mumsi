@@ -269,7 +269,10 @@ int main(int argc, char *argv[]) {
                 &mumbleChannelJoiner,
                 mumcom);
 
-        mumbleConf.user = conf.getString("mumble.user") + '-' + std::to_string(i);
+        if ( max_calls > 1 ) {
+            mumbleConf.user = conf.getString("mumble.user") + '-' + std::to_string(i);
+        }
+
         try {
             if ( conf.getBool("mumble.use_certs") ) {
                 mumbleConf.cert_file = mumbleConf.user + "-cert.pem";
