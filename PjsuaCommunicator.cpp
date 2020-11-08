@@ -505,6 +505,8 @@ sip::PjsuaCommunicator::PjsuaCommunicator(IncomingConnectionValidator &validator
 
     endpoint.libInit(endpointConfig);
 
+    endpoint.audDevManager().setNullDev();
+
     for(int i=0; i<maxCalls; ++i) {
         calls[i].index = i;
         pj_caching_pool_init(&(calls[i].cachingPool), &pj_pool_factory_default_policy, 0);
