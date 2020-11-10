@@ -54,7 +54,7 @@ for ((i=0; i<$COUNT; i++)) {
     if [ -z "$2" ]; then
         prefix="${USER}"
     else
-        prefix="${USER}${i}"
+        prefix="${USER}-${i}"
     fi
 
     subj=$(printf "$SUBJFMT" $prefix)
