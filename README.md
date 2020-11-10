@@ -49,6 +49,29 @@ Remember to add URIs which you want to make calls from. Calls from other URIs wo
 ./mumsi config.ini
 ```
 
+### Docker
+Instead of installing all the dependencies on your system you can just build the Docker image where they
+are installed and the app is automatically built.
+
+To do this run:
+```
+docker build -t mumsi .
+```
+
+Now create a folder called `config` and copy `config.ini.example` into it and rename that file to `config.ini`.
+This folder will be mounted into the Docker container and allows you to edit the config like you would with
+a local setup.
+
+You need to change the media file paths in the `[files]` of the config from `../media` to `/app/media/`
+if you want to make use of audio clips.
+
+Next you can start the image as a container using the following command:
+```
+docker run -v $(PWD)/config:/config --network=host mumsi
+```
+The `host` network mode is only required for the SIP client to know the host IP address, only port 5060 is used.
+This could potentially also be solved by allowing users to manually configure the host IP.
+
 ## Configuring
 
 ### Multi-Line Support
