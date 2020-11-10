@@ -3,6 +3,8 @@ project(mumsi)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
+add_subdirectory(modules/mumlib)
+
 INCLUDE(FindPkgConfig)
 find_package(Boost COMPONENTS system regex REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -15,10 +17,10 @@ add_definitions(${LOG4CPP_CFLAGS})
 
 include_directories(${PJSIP_INCLUDE_DIRS})
 include_directories(${LOG4CPP_INCLUDE_DIRS})
-include_directories(../mumpi/deps/mumlib/include)
+include_directories(modules/mumlib/include)
 include_directories(../pjproject/install/include)
 
-link_directories(../mumpi/build/deps/mumlib)
+link_directories(modules/mumlib/build)
 link_directories(../pjproject/install/lib)
 
 set(SOURCE_FILES
