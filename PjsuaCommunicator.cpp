@@ -110,6 +110,7 @@ namespace sip {
         virtual void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
 
         virtual void onDtmfDigit(pj::OnDtmfDigitParam &prm) override;
+        void onInstantMessage(pj::OnInstantMessageParam &prm) override;
 
         virtual void playAudioFile(std::string file);
         virtual void playAudioFile(std::string file, bool in_chan);
@@ -127,6 +128,7 @@ namespace sip {
         virtual void onRegState(pj::OnRegStateParam &prm) override;
 
         virtual void onIncomingCall(pj::OnIncomingCallParam &iprm) override;
+        void onInstantMessage(pj::OnInstantMessageParam &prm) override;
 
     private:
         sip::PjsuaCommunicator &communicator;
@@ -140,7 +142,7 @@ namespace sip {
     void _Call::onCallState(pj::OnCallStateParam &prm) {
         auto ci = getInfo();
 
-        communicator.logger.notice("Call %d state=%s.", ci.id, ci.stateText.c_str());
+        communicator.logger.notice("-------------------Call %d state=%s.", ci.id, ci.stateText.c_str());
 
         string address = ci.remoteUri;
 
@@ -432,6 +434,13 @@ namespace sip {
 
     }
 
+    void _Call::onInstantMessage(pj::OnInstantMessageParam &prm) {
+        auto ci = getInfo();
+        auto msgText = prm.msgBody;
+        communicator.calls[ci.id].sendTextMessageStr(mumlib::MessageType::TEXTMESSAGE, msgText);
+        communicator.logger.info("CALL ++++++++++++ from: %s message: %s.", prm.fromUri.c_str(), prm.msgBody.c_str());
+    }
+
     void _Account::onRegState(pj::OnRegStateParam &prm) {
         pj::AccountInfo ai = getInfo();
         communicator.logger << log4cpp::Priority::INFO
@@ -443,7 +452,7 @@ namespace sip {
 
         string uri = call->getInfo().remoteUri;
 
-        communicator.logger.notice("Incoming call from %s.", uri.c_str());
+        communicator.logger.notice("****************** Incoming call from %s.", uri.c_str());
 
         pj::CallOpParam param;
 
@@ -464,6 +473,13 @@ namespace sip {
             param.statusCode = PJSIP_SC_SERVICE_UNAVAILABLE;
             call->hangup(param);
         }
+    }
+
+    void _Account::onInstantMessage(pj::OnInstantMessageParam &prm) {
+        auto ci = getInfo();
+        auto msgText = prm.msgBody;
+        communicator.calls[ci.id].sendTextMessageStr(mumlib::MessageType::TEXTMESSAGE, msgText);
+        communicator.logger.info("ACCOUNT ++++++++++++ from: %s message: %s.", prm.fromUri.c_str(), prm.msgBody.c_str());
     }
 }
 

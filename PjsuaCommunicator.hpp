@@ -28,7 +28,7 @@ enum dtmf_modes_t {DTMF_MODE_UNAUTH, DTMF_MODE_ROOT, DTMF_MODE_STAR};
 namespace sip {
 
     constexpr int DEFAULT_PORT = 5060;
-    constexpr int SAMPLING_RATE = 48000;
+    constexpr int SAMPLING_RATE = 16000;
     constexpr int MAX_CALLER_PIN_LEN = 64;
     constexpr int MAX_PIN_FAILS = 2;
 
@@ -77,6 +77,7 @@ namespace sip {
         std::function<void(int)> onMuteDeafChange;
         std::function<void(mumlib::UserState field, bool val)> sendUserState;
         std::function<void(mumlib::UserState field, std::string val)> sendUserStateStr;
+        std::function<void(mumlib::MessageType field, std::string val)> sendTextMessageStr;
         std::function<void(const std::string& address)> onConnect;
         std::function<void()> onDisconnect;
         std::function<void()> onCallerAuth;

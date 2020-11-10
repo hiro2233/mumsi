@@ -79,6 +79,7 @@ namespace mumble {
         std::function<void()> onUserState;
 
         void sendTextMessage(std::string message);
+        void sendTextMessageStr(mumlib::MessageType field, std::string message);
 
         void joinChannel(int channel_id);
 

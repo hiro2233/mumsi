@@ -143,6 +143,10 @@ void mumble::MumbleCommunicator::sendTextMessage(std::string message) {
     mum->sendTextMessage(message);
 }
 
+void mumble::MumbleCommunicator::sendTextMessageStr(mumlib::MessageType field, std::string message) {
+    mum->sendTextMessage(message);
+}
+
 /*
 void mumble::MumbleCommunicator::onUserState(
         int32_t session,

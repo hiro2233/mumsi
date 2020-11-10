@@ -208,6 +208,13 @@ int main(int argc, char *argv[]) {
                 mumcom,
                 _1, _2);
 
+        // Send TextMessage to Mumble
+        pjsuaCommunicator.calls[i].sendTextMessageStr = std::bind(
+                static_cast<void(mumble::MumbleCommunicator::*)(mumlib::MessageType, std::string)>
+                (&mumble::MumbleCommunicator::sendTextMessageStr),
+                mumcom,
+                _1, _2);
+
         // PJ triggers Mumble connect
         pjsuaCommunicator.calls[i].onConnect = std::bind(
                 &mumble::MumbleCommunicator::onConnect,
