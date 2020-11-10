@@ -51,7 +51,12 @@ if [ -z "$COUNT" ]; then
 fi
 
 for ((i=0; i<$COUNT; i++)) {
-    prefix="${USER}${i}"
+    if [ -z "$2" ]; then
+        prefix="${USER}"
+    else
+        prefix="${USER}-${i}"
+    fi
+
     subj=$(printf "$SUBJFMT" $prefix)
 
     openssl req \

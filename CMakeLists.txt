@@ -41,5 +41,5 @@ add_executable(mumsi ${SOURCE_FILES} main.cpp)
 target_link_libraries(mumsi pjsua2 pjsua pjmedia pj)
 target_link_libraries(mumsi ${LOG4CPP_LIBRARIES})
 target_link_libraries(mumsi ${Boost_LIBRARIES})
-target_link_libraries(mumsi mumlib)
+target_link_libraries(mumsi mumlib speexdsp crypto ssl protobuf opus execinfo)
 

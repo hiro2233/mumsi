@@ -13,3 +13,7 @@ cmake-build-debug/
 Makefile
 cmake_install.cmake
 mumsi
+
+README.md
+.gitignore
+Dockerfile

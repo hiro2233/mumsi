@@ -505,6 +505,8 @@ sip::PjsuaCommunicator::PjsuaCommunicator(IncomingConnectionValidator &validator
 
     endpoint.libInit(endpointConfig);
 
+    endpoint.audDevManager().setNullDev();
+
     for(int i=0; i<maxCalls; ++i) {
         calls[i].index = i;
         pj_caching_pool_init(&(calls[i].cachingPool), &pj_pool_factory_default_policy, 0);
@@ -585,7 +587,7 @@ void sip::PjsuaCommunicator::registerAccount(string host, string user, string pa
     string uri = "sip:" + user + "@" + host;
     pj::AccountConfig accountConfig;
     accountConfig.idUri = uri;
-    //accountConfig.regConfig.registrarUri = "sip:" + host;
+    accountConfig.regConfig.registrarUri = "sip:" + host;
 
     pj::AuthCredInfo cred("digest", "*", user, 0, password);
     accountConfig.sipConfig.authCreds.push_back(cred);
