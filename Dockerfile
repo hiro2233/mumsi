@@ -19,12 +19,7 @@ COPY . mumsi/
 
 WORKDIR mumsi
 
-# Build mumlib from git submodule
-RUN mkdir -p modules/mumlib/build && cd modules/mumlib/build \
-    && cmake .. \
-    && make -j
-
-# Build mumsi
+# Build mumlib & mumsi
 RUN mkdir build && cd build \
     && cmake .. \
     && make -j
